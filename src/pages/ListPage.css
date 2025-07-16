@@ -1,0 +1,100 @@
+/* src/pages/ListPage.css */
+.list-page-container {
+    width: 100%;
+    max-width: 1152px; /* 68rem */
+    margin: 0 auto;
+    padding: 4rem 1rem;
+    animation: fadeIn 1s ease-in-out;
+}
+
+.list-page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.list-page-title {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #e5e7eb;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.list-page-subtitle {
+    color: #6b7280;
+    margin-top: 0.5rem;
+    font-family: 'Lora', serif;
+}
+
+/* We are reusing the article-grid styles from Homepage.css */
+/* If you need to copy them, they are here for convenience */
+.article-grid {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 2rem;
+}
+
+.article-card {
+    background-color: rgba(34, 34, 34, 0.6);
+    border-radius: 0.5rem;
+    border: 1px solid rgba(63, 63, 70, 0.5);
+    overflow: hidden;
+    transition: all 0.3s ease-out;
+    display: block;
+}
+
+.article-card:hover {
+    border-color: #00ff99;
+    transform: translateY(-4px);
+}
+
+.article-card-image {
+    width: 100%;
+    height: 10rem;
+    object-fit: cover;
+}
+
+.article-card-content {
+    padding: 1.25rem;
+}
+
+.article-card-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #e5e7eb;
+    margin-bottom: 0.5rem;
+    transition: color 0.3s ease-out;
+}
+
+.article-card:hover .article-card-title {
+    color: #00ff99;
+}
+
+.article-card-description {
+    font-family: 'Lora', serif;
+    color: #9ca3af;
+    font-size: 0.875rem;
+    line-height: 1.6;
+}
+
+@media (min-width: 768px) {
+    .article-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .article-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* src/pages/ListPage.css එකේ අන්තිමටම දාන්න */
+
+.article-card.archives-list-card:hover {
+    border-color: #ff3b30;
+}
+
+.article-card.archives-list-card:hover .article-card-title {
+    color: #ff3b30;
+}
