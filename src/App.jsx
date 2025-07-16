@@ -4,7 +4,7 @@ import Homepage from './pages/Homepage';
 import DecodedPage from './pages/DecodedPage';
 import ArchivesPage from './pages/ArchivesPage';
 import SinglePostPage from './pages/SinglePostPage'; // අලුතෙන් import කරගන්නවා
-import EpisodeListPage from './src/pages/EpisodeListPage';
+import EpisodeListPage from './pages/EpisodeListPage';
 
 function App() {
   return (
