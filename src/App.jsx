@@ -1,9 +1,6 @@
 // src/App.jsx
 import { Routes, Route } from 'react-router-dom';
 import LanguageSwitcher from './components/LanguageSwitcher';
-import Footer from './components/Footer'; // <-- 1. Footer එක import කරගන්න
-
-// --- ඔයාගේ page components ටික import කරගන්න ---
 import Homepage from './pages/Homepage';
 import ArchivesPage from './pages/ArchivesPage';
 import EpisodeListPage from './pages/EpisodeListPage';
@@ -31,9 +28,7 @@ function App() {
         </Routes>
       </main>
 
-      {/* 3. Footer එක මෙතනට, main content එකට පස්සේ දාන්න */}
-      <Footer />
-    </>
+   </>
   );
 }
 
