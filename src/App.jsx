@@ -10,12 +10,14 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<Homepage />} />
-
       <Route path="/decoded" element={<DecodedPage />} />
-      <Route path="/decoded/:slug" element={<SinglePostPage />} /> {/* අලුත් dynamic route එක */}
-      <Route path="/the-archives/season/:seasonNumber" element={<EpisodeListPage />} />
+      <Route path="/decoded/:slug" element={<SinglePostPage />} />
+      
       <Route path="/the-archives" element={<ArchivesPage />} />
-      <Route path="/the-archives/:slug" element={<SinglePostPage />} /> {/* අලුත් dynamic route එක */}
+      {/* --- අලුතෙන් එකතු කරපු Route එක --- */}
+      <Route path="/the-archives/season/:seasonNumber" element={<EpisodeListPage />} />
+      <Route path="/the-archives/episode/:slug" element={<SinglePostPage />} />
+      
     </Routes>
   );
 }
