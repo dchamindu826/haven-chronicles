@@ -24,7 +24,7 @@ const BookIcon = () => ( <svg xmlns="http://www.w3.org/2000/svg" width="48" heig
 function Homepage() {
     const [latestArticles, setLatestArticles] = useState([]);
 
-    // **මෙන්න ඔයා දීපු Adsterra Ad Code එක**
+    // ඔයා දීපු Adsterra Ad Code එක
     const bannerAdCode = `
         <script type="text/javascript">
             atOptions = {
@@ -72,7 +72,6 @@ function Homepage() {
                 </Link>
             </main>
 
-            {/* Ad Banner එක පෙන්වන තැන */}
             <section className="ad-wrapper">
                 <AdBanner adCode={bannerAdCode} />
             </section>
