@@ -33,7 +33,7 @@ function ArchivesPage() {
         <div className="list-page-container">
             <header className="list-page-header">
                 <h1 className="list-page-title">The Archives</h1>
-                <p className="list-page-subtitle">Select a season to begin.</p>
+                <p className="list-page-subtitle">Select a Story to begin.</p>
             </header>
 
             <main className="article-grid">
