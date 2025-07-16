@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { client } from '../../lib/client';
+import { client } from '../lib/client';
 import './ListPage.css'; // අපි පරණ CSS file එකම පාවිච්චි කරමු
 
 function EpisodeListPage() {
