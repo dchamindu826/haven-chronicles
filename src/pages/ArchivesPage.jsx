@@ -1,53 +1,58 @@
-// src/pages/ArchivesPage.jsx
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { client } from '../lib/client';
-import './ListPage.css'; // අපි කලින් හදපු CSS file එකම පාවිච්චි කරනවා
+import './ListPage.css'; // අපි ListPage.css එකම පාවිච්චි කරමු
 
 function ArchivesPage() {
-    const [episodes, setEpisodes] = useState([]);
+    const [seasons, setSeasons] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Query එකේ _type එක විතරයි වෙනස් වෙන්නේ
-        const query = `*[_type == "archiveEpisode"] | order(publishedAt desc){
-          title,
-          "slug": slug.current,
-          description,
-          "imageUrl": mainImage.asset->url,
-          seasonNumber,
-          episodeNumber
+        // දැන් අපි episodes වෙනුවට seasons තමයි ගේන්නේ
+        const query = `*[_type == "season"] | order(seasonNumber asc){
+            _id,
+            title,
+            seasonNumber,
+            description,
+            "posterUrl": poster.asset->url
         }`;
 
-        client.fetch(query).then((data) => {
-            setEpisodes(data);
-        });
+        client.fetch(query)
+            .then((data) => {
+                setSeasons(data);
+                setLoading(false);
+            })
+            .catch(console.error);
     }, []);
+
+    if (loading) {
+        return <div className="loading-screen">Loading Seasons...</div>;
+    }
 
     return (
         <div className="list-page-container">
             <header className="list-page-header">
-                <h1 className="list-page-title" style={{color: '#ff3b30'}}>THE ARCHIVES</h1>
-                <p className="list-page-subtitle">The stories of those who found Haven.</p>
+                <h1 className="list-page-title">The Archives</h1>
+                <p className="list-page-subtitle">Select a season to begin.</p>
             </header>
 
-            <div className="article-grid">
-                {episodes.length > 0 ? (
-                    episodes.map((episode) => (
-                        <Link to={`/the-archives/${episode.slug}`} key={episode.slug} className="article-card archives-list-card">
-                            <img src={episode.imageUrl || 'https://placehold.co/600x400/1f2937/4b5563?text=No+Image'} alt={episode.title} className="article-card-image" />
-                            <div className="article-card-content">
-                                <p className="article-card-type" style={{color: '#ff3b30'}}>
-                                    SEASON {episode.seasonNumber} | EPISODE {episode.episodeNumber}
-                                </p>
-                                <h4 className="article-card-title">{episode.title}</h4>
-                                <p className="article-card-description">{episode.description}</p>
-                            </div>
-                        </Link>
-                    ))
-                ) : (
-                    <p>Loading episodes...</p>
-                )}
-            </div>
+            <main className="article-grid">
+                {seasons.map((season) => (
+                    // හැම season එකකටම link එකක් එක්ක card එකක් හදනවා
+                    <Link to={`/the-archives/season/${season.seasonNumber}`} key={season._id} className="article-card">
+                        <img 
+                            src={season.posterUrl || 'https://placehold.co/600x400/1f2937/4b5563?text=No+Poster'} 
+                            alt={`${season.title} Poster`} 
+                            className="article-card-image" 
+                        />
+                        <div className="article-card-content">
+                            <p className="article-card-type">{season.title}</p>
+                            <h4 className="article-card-title">Season {season.seasonNumber}</h4>
+                            <p className="article-card-description">{season.description}</p>
+                        </div>
+                    </Link>
+                ))}
+            </main>
         </div>
     );
 }
