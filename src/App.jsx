@@ -1,25 +1,33 @@
 // src/App.jsx
 import { Routes, Route } from 'react-router-dom';
-import Homepage from './pages/Homepage';
-import DecodedPage from './pages/DecodedPage';
-import ArchivesPage from './pages/ArchivesPage';
-import SinglePostPage from './pages/SinglePostPage'; // අලුතෙන් import කරගන්නවා
-import EpisodeListPage from './pages/EpisodeListPage';
 import LanguageSwitcher from './components/LanguageSwitcher';
+
+// --- ඔයාගේ page components ටික import කරගන්න ---
+import Homepage from './pages/Homepage';
+import ArchivesPage from './pages/ArchivesPage';
+import EpisodeListPage from './pages/EpisodeListPage';
+import DecodedPage from './pages/DecodedPage';
+import SinglePostPage from './pages/SinglePostPage';
+
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Homepage />} />
-      <Route path="/decoded" element={<DecodedPage />} />
-      <Route path="/decoded/:slug" element={<SinglePostPage />} />
+    // <LanguageSwitcher> එක <Routes> එකට පිටින්, හැබැයි ප්‍රධාන Fragment <> එක ඇතුලේ තියෙන්න ඕන.
+    <>
       <LanguageSwitcher />
-      <Route path="/the-archives" element={<ArchivesPage />} />
-      {/* --- අලුතෙන් එකතු කරපු Route එක --- */}
-      <Route path="/the-archives/season/:seasonNumber" element={<EpisodeListPage />} />
-      <Route path="/the-archives/episode/:slug" element={<SinglePostPage />} />
-      
-    </Routes>
+
+      <Routes>
+        {/* මෙතන තියෙන්න ඕනේ <Route> components විතරයි */}
+        <Route path="/" element={<Homepage />} />
+
+        <Route path="/the-archives" element={<ArchivesPage />} />
+        <Route path="/the-archives/season/:seasonNumber" element={<EpisodeListPage />} />
+        <Route path="/the-archives/episode/:slug" element={<SinglePostPage />} />
+        
+        <Route path="/decoded" element={<DecodedPage />} />
+        <Route path="/decoded/:slug" element={<SinglePostPage />} />
+      </Routes>
+    </>
   );
 }
 
