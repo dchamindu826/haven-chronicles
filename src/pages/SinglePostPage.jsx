@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { client } from '../lib/client';
 import { PortableText } from '@portabletext/react';
-import { useLanguage } from '../context/LanguageContext'; // Language Context එක import කරගන්නවා
+import { useLanguage } from '../context/LanguageContext';
 import './SinglePostPage.css';
 
-// Star component for displaying ratings
+// Star component එකේ වෙනසක් අවශ්‍ය නෑ
 const StarsDisplay = ({ rating }) => (
     <div className="stars-display">
         {[...Array(5)].map((_, i) => (
@@ -14,8 +14,46 @@ const StarsDisplay = ({ rating }) => (
     </div>
 );
 
+// භාෂාවට අදාළව පාවිච්චි වෙන වචන ටික එක තැනකට ගත්තා. මේකෙන් කෝඩ් එක පිළිවෙල වෙනවා.
+const translations = {
+    en: {
+        loading: 'Loading Content...',
+        contentNotAvailable: 'Content not available in this language.',
+        leaveReview: 'Leave a Review',
+        yourName: 'Your Name',
+        yourComment: 'Your Comment...',
+        submitting: 'Submitting...',
+        submitComment: 'Submit Comment',
+        submissionSuccess: 'Thank you! Your comment has been submitted for review.',
+        reviews: 'Reviews',
+        noReviews: 'No reviews yet. Be the first to comment!',
+        previousPost: 'Previous Post',
+        nextPost: 'Next Post',
+        alertFields: 'Please fill out all fields and provide a rating.',
+        alertError: 'There was an error submitting your comment.'
+    },
+    si: {
+        loading: 'තොරතුරු ලබාගනිමින් පවතී...',
+        contentNotAvailable: 'මෙම භාෂාවෙන් තොරතුරු නොමැත.',
+        leaveReview: 'සमीක්ෂණයක් එක් කරන්න',
+        yourName: 'ඔබේ නම',
+        yourComment: 'ඔබේ අදහස...',
+        submitting: 'යවමින් පවතී...',
+        submitComment: 'අදහස යවන්න',
+        submissionSuccess: 'ස්තූතියි! ඔබගේ අදහස සමාලෝචනය සඳහා ඉදිරිපත් කර ඇත.',
+        reviews: 'සमीක්ෂණ',
+        noReviews: 'තවමත් සमीක්ෂණ නොමැත. පළමුවැන්නා වන්න!',
+        previousPost: 'පෙර ලිපිය',
+        nextPost: 'ඊළඟ ලිපිය',
+        alertFields: 'කරුණාකර සියලු ක්ෂේත්‍ර පුරවා rating එකක් ලබා දෙන්න.',
+        alertError: 'ඔබගේ අදහස යැවීමේදී දෝෂයක් ඇතිවිය.'
+    }
+};
+
 function SinglePostPage() {
-    const { language } = useLanguage(); // තෝරගෙන ඉන්න භාෂාව මෙතනින් ගන්නවා
+    const { language } = useLanguage();
+    const t = translations[language] || translations.en; // Default to English if language not found
+
     const [postData, setPostData] = useState(null);
     const [comments, setComments] = useState([]);
     const [formData, setFormData] = useState({ name: '', comment: '', rating: 0 });
@@ -24,42 +62,37 @@ function SinglePostPage() {
     const { slug } = useParams();
 
     useEffect(() => {
-        // භාෂා දෙකටම අදාළ fields මෙතනින් ගේනවා
         const query = `*[_type in ["decodedPost", "archiveEpisode"] && slug.current == $slug][0]{
             _id,
             "type": _type,
-            title_en, title_si,
+            "title": coalesce(title_${language}, title_en, title),
+            "body": coalesce(body_${language}, body_en, body),
             "imageUrl": mainImage.asset->url,
-            body_en, body_si,
             publishedAt,
-            "previousPost": *[_type == ^._type && publishedAt < ^.publishedAt] | order(publishedAt desc)[0]{ "slug": slug.current, "type": _type },
-            "nextPost": *[_type == ^._type && publishedAt > ^.publishedAt] | order(publishedAt asc)[0]{ "slug": slug.current, "type": _type }
+            "previousPost": *[_type == ^._type && publishedAt < ^.publishedAt] | order(publishedAt desc)[0]{ "slug": slug.current, "type": _type, "title": coalesce(title_${language}, title_en, title) },
+            "nextPost": *[_type == ^._type && publishedAt > ^.publishedAt] | order(publishedAt asc)[0]{ "slug": slug.current, "type": _type, "title": coalesce(title_${language}, title_en, title) }
         }`;
         
         const commentsQuery = `*[_type == "comment" && post._ref == $postId && approved == true] | order(_createdAt desc)`;
 
+        setPostData(null); // Reset post data on slug/language change
+        setLoading(true);
+
         client.fetch(query, { slug }).then((data) => {
             setPostData(data);
             if (data?._id) {
-                client.fetch(commentsQuery, { postId: data._id }).then((commentsData) => {
-                    setComments(commentsData);
-                });
+                client.fetch(commentsQuery, { postId: data._id }).then(setComments);
             }
         });
-    }, [slug]);
+    }, [slug, language]);
 
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
-    
-    const handleRating = (rate) => {
-        setFormData({ ...formData, rating: rate });
-    };
+    const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+    const handleRating = (rate) => setFormData({ ...formData, rating: rate });
 
     const handleSubmit = (e) => {
         e.preventDefault();
         if (!formData.name || !formData.comment || formData.rating === 0) {
-            alert('Please fill out all fields and provide a rating.');
+            alert(t.alertFields);
             return;
         }
         setIsSubmitting(true);
@@ -69,7 +102,7 @@ function SinglePostPage() {
             name: formData.name,
             comment: formData.comment,
             rating: formData.rating,
-            approved: false,
+            approved: false, // Comments need approval
             post: {
                 _type: 'reference',
                 _ref: postData._id,
@@ -81,44 +114,39 @@ function SinglePostPage() {
             setIsSubmitted(true);
         }).catch((err) => {
             console.error('Comment submission error:', err);
-            alert('There was an error submitting your comment.');
+            alert(t.alertError);
             setIsSubmitting(false);
         });
     };
 
-    // Link හදන තැන නිවැරදි කරනවා
     const getLinkPath = (post) => {
-        if (!post || !post.slug) return null;
+        if (!post || !post.slug) return "#";
         return post.type === 'archiveEpisode' 
             ? `/the-archives/episode/${post.slug}` 
             : `/decoded/${post.slug}`;
     };
 
-    if (!postData) return <div className="loading-screen">Loading Content...</div>;
-    
-    // භාෂාව අනුව පෙන්නන්න ඕන content එක තෝරගන්නවා
-    const title = language === 'en' ? postData.title_en : postData.title_si;
-    const body = language === 'en' ? postData.body_en : postData.body_si;
+    if (!postData) return <div className="loading-screen">{t.loading}</div>;
 
     return (
         <>
             <article className="single-post-container">
                 <header className="single-post-header">
-                    <h1 className="single-post-title">{title}</h1>
-                    <p className="single-post-date">{new Date(postData.publishedAt).toLocaleDateString()}</p>
+                    <h1 className="single-post-title">{postData.title}</h1>
+                    {postData.publishedAt && <p className="single-post-date">{new Date(postData.publishedAt).toLocaleDateString()}</p>}
                 </header>
 
-                {postData.imageUrl && (<img src={postData.imageUrl} alt={title} className="single-post-image"/>)}
+                {postData.imageUrl && (<img src={postData.imageUrl} alt={postData.title} className="single-post-image"/>)}
                 
                 <div className="single-post-body">
-                    {body ? <PortableText value={body} /> : <p>Content not available in this language.</p>}
+                    {postData.body ? <PortableText value={postData.body} /> : <p>{t.contentNotAvailable}</p>}
                 </div>
             </article>
 
             <section className="comment-section">
-                <h3 className="comment-title">Leave a Review</h3>
+                <h3 className="comment-title">{t.leaveReview}</h3>
                 
-                {isSubmitted ? ( <div className="submission-success">Thank you! Your comment has been submitted for review.</div> ) : (
+                {isSubmitted ? ( <div className="submission-success">{t.submissionSuccess}</div> ) : (
                     <form className="comment-form" onSubmit={handleSubmit}>
                         <div className="star-rating-input">
                             {[...Array(5)].map((_, index) => {
@@ -128,14 +156,14 @@ function SinglePostPage() {
                                 );
                             })}
                         </div>
-                        <input type="text" name="name" placeholder="Your Name" value={formData.name} onChange={handleChange} className="form-input" required />
-                        <textarea name="comment" placeholder="Your Comment..." value={formData.comment} onChange={handleChange} className="form-textarea" rows="5" required></textarea>
-                        <button type="submit" className="form-button" disabled={isSubmitting}>{isSubmitting ? 'Submitting...' : 'Submit Comment'}</button>
+                        <input type="text" name="name" placeholder={t.yourName} value={formData.name} onChange={handleChange} className="form-input" required />
+                        <textarea name="comment" placeholder={t.yourComment} value={formData.comment} onChange={handleChange} className="form-textarea" rows="5" required></textarea>
+                        <button type="submit" className="form-button" disabled={isSubmitting}>{isSubmitting ? t.submitting : t.submitComment}</button>
                     </form>
                 )}
 
                 <div className="comment-list">
-                    <h4 className="comment-list-title">Reviews</h4>
+                    <h4 className="comment-list-title">{t.reviews}</h4>
                     {comments.length > 0 ? (
                         comments.map((comment) => (
                             <div key={comment._id} className="comment-item">
@@ -151,13 +179,13 @@ function SinglePostPage() {
                                 </div>
                             </div>
                         ))
-                    ) : ( <p className="no-comments">No reviews yet. Be the first to comment!</p> )}
+                    ) : ( <p className="no-comments">{t.noReviews}</p> )}
                 </div>
             </section>
 
             <nav className="post-navigation">
-                {postData.previousPost ? (<Link to={getLinkPath(postData.previousPost)} className="nav-link prev-link">&larr; Previous Post</Link>) : (<div />)}
-                {postData.nextPost ? (<Link to={getLinkPath(postData.nextPost)} className="nav-link next-link">Next Post &rarr;</Link>) : (<div />)}
+                {postData.previousPost ? (<Link to={getLinkPath(postData.previousPost)} className="nav-link prev-link">&larr; {t.previousPost}</Link>) : (<div />)}
+                {postData.nextPost ? (<Link to={getLinkPath(postData.nextPost)} className="nav-link next-link">{t.nextPost} &rarr;</Link>) : (<div />)}
             </nav>
         </>
     );

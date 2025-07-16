@@ -1,16 +1,18 @@
-// src/components/LanguageSwitcher.jsx
 import React from 'react';
-import { useLanguage } from '../context/LanguageContext';
-import './LanguageSwitcher.css'; // අපි මේකට styles ටිකක් දාමු
+import { useLanguage } from '../context/LanguageContext'; // අපේ custom hook එක import කරනවා
 
 function LanguageSwitcher() {
-    const { language, toggleLanguage } = useLanguage();
+  // context එකෙන් language එකයි, toggle function එකයි ගන්නවා
+  const { language, toggleLanguage } = useLanguage();
 
-    return (
-        <button onClick={toggleLanguage} className="language-switcher">
-            {language === 'en' ? 'සිංහල' : 'English'}
-        </button>
-    );
+  return (
+    <div className="language-switcher">
+      {/* button එක click කරාම කෙලින්ම toggleLanguage function එක call කරනවා */}
+      <button onClick={toggleLanguage}>
+        {language === 'si' ? 'English' : 'සිංහල'}
+      </button>
+    </div>
+  );
 }
 
 export default LanguageSwitcher;

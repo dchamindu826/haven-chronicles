@@ -1,27 +1,30 @@
+// src/pages/EpisodeListPage.jsx
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { client } from '../lib/client';
-import { useLanguage } from '../context/LanguageContext'; // Language Context එක import කරගන්නවා
+import { useLanguage } from '../context/LanguageContext';
 import './ListPage.css';
 
 function EpisodeListPage() {
-    const { language } = useLanguage(); // තෝරගෙන ඉන්න භාෂාව මෙතනින් ගන්නවා
+    const { language } = useLanguage();
     const [episodes, setEpisodes] = useState([]);
     const [seasonTitle, setSeasonTitle] = useState('');
     const [loading, setLoading] = useState(true);
     const { seasonNumber } = useParams();
 
     useEffect(() => {
-        // Query එකට භාෂා දෙකේම fields ගේනවා
+        setLoading(true);
+
+        // Query එක coalesce පාවිච්චි කරලා තවත් සරල කරා
         const query = `*[_type == "archiveEpisode" && season->seasonNumber == $seasonNum] | order(episodeNumber asc){
             _id,
-            title_en, title_si,
+            "title": coalesce(title_${language}, title_en, title),
             "slug": slug.current,
             episodeNumber,
-            description_en, description_si,
+            "description": coalesce(description_${language}, description_en, description),
             "imageUrl": mainImage.asset->url,
-            "seasonTitle_en": season->title, // Season title එකත් English වලින් ගමු (default)
-            "seasonTitle_si": season->title // Season title එක දැනට දෙකම එකයි
+            "seasonTitle": coalesce(season->title_${language}, season->title_en, season->title)
         }`;
 
         const params = { seasonNum: parseInt(seasonNumber) };
@@ -30,16 +33,15 @@ function EpisodeListPage() {
             .then((data) => {
                 setEpisodes(data);
                 if (data.length > 0) {
-                    // භාෂාව අනුව Season Title එක state එකට දාගන්නවා
-                    const title = language === 'en' ? data[0].seasonTitle_en : data[0].seasonTitle_si;
-                    setSeasonTitle(title || `Season ${seasonNumber}`);
+                    // Query එකෙන්ම නිවැරදි භාෂාවෙන් title එක එන නිසා, මෙතන logic එක සරල වෙනවා
+                    setSeasonTitle(data[0].seasonTitle || (language === 'si' ? `වාරය ${seasonNumber}`: `Season ${seasonNumber}`));
                 } else {
-                    setSeasonTitle(`Season ${seasonNumber}`);
+                    setSeasonTitle(language === 'si' ? `වාරය ${seasonNumber}`: `Season ${seasonNumber}`);
                 }
                 setLoading(false);
             })
             .catch(console.error);
-    }, [seasonNumber, language]); // language එක වෙනස් වෙනකොටත් query එක ආයෙත් run වෙන්න ඕන
+    }, [seasonNumber, language]);
 
     if (loading) {
         return <div className="loading-screen">Loading Episodes...</div>;
@@ -49,30 +51,31 @@ function EpisodeListPage() {
         <div className="list-page-container">
             <header className="list-page-header">
                 <h1 className="list-page-title">{seasonTitle}</h1>
-                <p className="list-page-subtitle">Select an episode to continue the story.</p>
+                {/* මේ text එකත් language එකට අනුව වෙනස් වෙන්න හැදුවා */}
+                <p className="list-page-subtitle">
+                    {language === 'si' ? 'කතාව ඉදිරියට ගෙන යාමට කථාංගයක් තෝරන්න.' : 'Select an episode to continue the story.'}
+                </p>
             </header>
 
             <main className="article-grid">
-                {episodes.map((episode) => {
-                    // භාෂාව අනුව title සහ description තෝරගන්නවා
-                    const title = language === 'en' ? episode.title_en : episode.title_si;
-                    const description = language === 'en' ? episode.description_en : episode.description_si;
-
-                    return (
-                        <Link to={`/the-archives/episode/${episode.slug}`} key={episode._id} className="article-card">
-                            <img 
-                                src={episode.imageUrl || 'https://placehold.co/600x400/1f2937/4b5563?text=No+Image'} 
-                                alt={`${title} Poster`} 
-                                className="article-card-image" 
-                            />
-                            <div className="article-card-content">
-                                <p className="article-card-type">Episode {episode.episodeNumber}</p>
-                                <h4 className="article-card-title">{title}</h4>
-                                <p className="article-card-description">{description}</p>
-                            </div>
-                        </Link>
-                    );
-                })}
+                {episodes.map((episode) => (
+                    // දැන් මෙතන ආයෙත් title, description තෝරන්න ඕනේ නෑ, query එකෙන්ම එන්නේ නිවැරදි එක
+                    <Link to={`/the-archives/episode/${episode.slug}`} key={episode._id} className="article-card">
+                        <img 
+                            src={episode.imageUrl || 'https://placehold.co/600x400/1f2937/4b5563?text=No+Image'} 
+                            alt={`${episode.title} Poster`} 
+                            className="article-card-image" 
+                        />
+                        <div className="article-card-content">
+                             {/* 'Episode' කියන වචනෙත් භාෂාවට අනුව වෙනස් වෙන්න හැදුවා */}
+                            <p className="article-card-type">
+                                {language === 'si' ? 'කථාංගය' : 'Episode'} {episode.episodeNumber}
+                            </p>
+                            <h4 className="article-card-title">{episode.title}</h4>
+                            <p className="article-card-description">{episode.description}</p>
+                        </div>
+                    </Link>
+                ))}
             </main>
         </div>
     );

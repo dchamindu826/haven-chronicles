@@ -1,19 +1,24 @@
-import React, { useState, useEffect } from 'react';
+// src/pages/ArchivesPage.jsx
+
+import React, { useState, useEffect, useContext } from 'react'; // <--- useContext එක import කරා
 import { Link } from 'react-router-dom';
 import { client } from '../lib/client';
-import './ListPage.css'; // අපි ListPage.css එකම පාවිච්චි කරමු
+import { useLanguage } from '../context/LanguageContext'; // <--- අපේ custom hook එක import කරා
+import './ListPage.css'; 
 
 function ArchivesPage() {
     const [seasons, setSeasons] = useState([]);
     const [loading, setLoading] = useState(true);
+    const { language } = useLanguage(); // <--- මෙතනදි අපි හදපු context එකෙන් language එක ගන්නවා
 
     useEffect(() => {
-        // දැන් අපි episodes වෙනුවට seasons තමයි ගේන්නේ
+        // Sanity එකෙන් data ගේන query එක භාෂාවට අනුව වෙනස් වෙන්න හදමු
+        // ඔයාගේ Sanity schema එකේ title, description වලට _si සහ _en version තියෙන්න ඕනේ
         const query = `*[_type == "season"] | order(seasonNumber asc){
             _id,
-            title,
             seasonNumber,
-            description,
+            "title": coalesce(title_${language}, title_en, title),
+            "description": coalesce(description_${language}, description_en, description),
             "posterUrl": poster.asset->url
         }`;
 
@@ -23,7 +28,7 @@ function ArchivesPage() {
                 setLoading(false);
             })
             .catch(console.error);
-    }, []);
+    }, [language]); // <--- මෙතනට language එකත් දානවා, භාෂාව මාරු කරද්දී data ආයෙත් load වෙන්න
 
     if (loading) {
         return <div className="loading-screen">Loading Seasons...</div>;
@@ -32,13 +37,13 @@ function ArchivesPage() {
     return (
         <div className="list-page-container">
             <header className="list-page-header">
-                <h1 className="list-page-title">The Archives</h1>
-                <p className="list-page-subtitle">Select a Story to begin.</p>
+                {/* මෙතන text එක language එකට අනුව වෙනස් වෙනවා */}
+                <h1 className="list-page-title">{language === 'si' ? 'ලේඛනාගාරය' : 'The Archives'}</h1>
+                <p className="list-page-subtitle">{language === 'si' ? 'කතාවක් තෝරා ආරම්භ කරන්න.' : 'Select a Story to begin.'}</p>
             </header>
 
             <main className="article-grid">
                 {seasons.map((season) => (
-                    // හැම season එකකටම link එකක් එක්ක card එකක් හදනවා
                     <Link to={`/the-archives/season/${season.seasonNumber}`} key={season._id} className="article-card">
                         <img 
                             src={season.posterUrl || 'https://placehold.co/600x400/1f2937/4b5563?text=No+Poster'} 
@@ -46,8 +51,9 @@ function ArchivesPage() {
                             className="article-card-image" 
                         />
                         <div className="article-card-content">
+                            {/* මෙතන season title එකත් Sanity එකෙන් එන විදිහට භාෂාවට අනුව වෙනස් වෙනවා */}
                             <p className="article-card-type">{season.title}</p>
-                            <h4 className="article-card-title">Season {season.seasonNumber}</h4>
+                            <h4 className="article-card-title">{language === 'si' ? `වාරය ${season.seasonNumber}` : `Season ${season.seasonNumber}`}</h4>
                             <p className="article-card-description">{season.description}</p>
                         </div>
                     </Link>
