@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { client } from '../lib/client';
 import { PortableText } from '@portabletext/react';
+import { useLanguage } from '../context/LanguageContext'; // Language Context එක import කරගන්නවා
 import './SinglePostPage.css';
 
 // Star component for displaying ratings
@@ -14,6 +15,7 @@ const StarsDisplay = ({ rating }) => (
 );
 
 function SinglePostPage() {
+    const { language } = useLanguage(); // තෝරගෙන ඉන්න භාෂාව මෙතනින් ගන්නවා
     const [postData, setPostData] = useState(null);
     const [comments, setComments] = useState([]);
     const [formData, setFormData] = useState({ name: '', comment: '', rating: 0 });
@@ -22,11 +24,13 @@ function SinglePostPage() {
     const { slug } = useParams();
 
     useEffect(() => {
+        // භාෂා දෙකටම අදාළ fields මෙතනින් ගේනවා
         const query = `*[_type in ["decodedPost", "archiveEpisode"] && slug.current == $slug][0]{
             _id,
-            title,
+            "type": _type,
+            title_en, title_si,
             "imageUrl": mainImage.asset->url,
-            body,
+            body_en, body_si,
             publishedAt,
             "previousPost": *[_type == ^._type && publishedAt < ^.publishedAt] | order(publishedAt desc)[0]{ "slug": slug.current, "type": _type },
             "nextPost": *[_type == ^._type && publishedAt > ^.publishedAt] | order(publishedAt asc)[0]{ "slug": slug.current, "type": _type }
@@ -76,29 +80,38 @@ function SinglePostPage() {
             setIsSubmitting(false);
             setIsSubmitted(true);
         }).catch((err) => {
-            console.error('Direct comment submission error:', err);
-            alert('There was an error submitting your comment. Please check the console.');
+            console.error('Comment submission error:', err);
+            alert('There was an error submitting your comment.');
             setIsSubmitting(false);
         });
     };
 
-    if (!postData) return <div className="loading-screen">Loading Content...</div>;
-
+    // Link හදන තැන නිවැරදි කරනවා
     const getLinkPath = (post) => {
-        if (!post) return null;
-        return post.type === 'archiveEpisode' ? `/the-archives/${post.slug}` : `/decoded/${post.slug}`;
+        if (!post || !post.slug) return null;
+        return post.type === 'archiveEpisode' 
+            ? `/the-archives/episode/${post.slug}` 
+            : `/decoded/${post.slug}`;
     };
+
+    if (!postData) return <div className="loading-screen">Loading Content...</div>;
+    
+    // භාෂාව අනුව පෙන්නන්න ඕන content එක තෝරගන්නවා
+    const title = language === 'en' ? postData.title_en : postData.title_si;
+    const body = language === 'en' ? postData.body_en : postData.body_si;
 
     return (
         <>
             <article className="single-post-container">
                 <header className="single-post-header">
-                    <h1 className="single-post-title">{postData.title}</h1>
+                    <h1 className="single-post-title">{title}</h1>
                     <p className="single-post-date">{new Date(postData.publishedAt).toLocaleDateString()}</p>
                 </header>
-                {postData.imageUrl && (<img src={postData.imageUrl} alt={postData.title} className="single-post-image"/>)}
+
+                {postData.imageUrl && (<img src={postData.imageUrl} alt={title} className="single-post-image"/>)}
+                
                 <div className="single-post-body">
-                    {postData.body ? <PortableText value={postData.body} /> : <p>No content available.</p>}
+                    {body ? <PortableText value={body} /> : <p>Content not available in this language.</p>}
                 </div>
             </article>
 
@@ -149,4 +162,5 @@ function SinglePostPage() {
         </>
     );
 }
+
 export default SinglePostPage;
