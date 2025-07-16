@@ -1,6 +1,8 @@
 // src/components/Footer.jsx
+
 import React from 'react';
-import { FaFacebook, FaTwitter, FaInstagram } from "react-icons/fa";
+// --- මෙන්න මේ ලයින් එක තමයි වැරදිලා තිබුණේ ---
+import { FaFacebook, FaTwitter, FaInstagram, FaYoutube } from "react-icons/fa"; // වැරදි 2ම මෙතන නිවැරදි කරා
 import './Footer.css';
 
 function Footer() {
