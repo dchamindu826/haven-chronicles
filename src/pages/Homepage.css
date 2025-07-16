@@ -242,3 +242,12 @@
 .article-card-type {
     margin-bottom: 0; /* Remove margin from type */
 }
+
+/* src/pages/Homepage.css */
+
+.ad-wrapper {
+  margin: 2rem 0; /* උඩින් සහ යටින් ඉඩ වෙන් කරයි */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
