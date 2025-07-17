@@ -2,8 +2,8 @@ import { Routes, Route } from 'react-router-dom';
 import { LanguageProvider } from './context/LanguageContext';
 
 // Components
-import Header from './components/Header'; // <-- Header එක import කරනවා
-import Footer from './components/Footer'; // <-- Footer එක import කරනවා
+import Header from './components/Header';
+import Footer from './components/Footer';
 import MainLayout from './components/MainLayout';
 
 // Pages
@@ -17,7 +17,7 @@ function App() {
   return (
     <LanguageProvider>
       <div className="app-container">
-        <Header /> {/* <-- Header එක මෙතන දානවා */}
+        <Header />
         <div className="content-wrap">
             <Routes>
               <Route path="/" element={<Homepage />} />
@@ -30,7 +30,7 @@ function App() {
               </Route>
             </Routes>
         </div>
-        <Footer /> {/* <-- Footer එක මෙතන දානවා */}
+        <Footer />
       </div>
     </LanguageProvider>
   );
