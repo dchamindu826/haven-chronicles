@@ -4,7 +4,7 @@ import { LanguageProvider } from './context/LanguageContext';
 // Components
 import Header from './components/Header';
 import Footer from './components/Footer';
-import MainLayout from './context/MainLayout';
+import MainLayout from './components/MainLayout';
 
 // Pages
 import Homepage from './pages/Homepage';
