@@ -63,14 +63,15 @@ function SinglePostPage() {
 
     useEffect(() => {
         const query = `*[_type in ["decodedPost", "archiveEpisode"] && slug.current == $slug][0]{
-            _id,
-            "type": _type,
-            "title": coalesce(title_${language}, title_en, title),
-            "body": coalesce(body_${language}, body_en, body),
-            "imageUrl": mainImage.asset->url,
-            publishedAt,
-            "previousPost": *[_type == ^._type && publishedAt < ^.publishedAt] | order(publishedAt desc)[0]{ "slug": slug.current, "type": _type, "title": coalesce(title_${language}, title_en, title) },
-            "nextPost": *[_type == ^._type && publishedAt > ^.publishedAt] | order(publishedAt asc)[0]{ "slug": slug.current, "type": _type, "title": coalesce(title_${language}, title_en, title) }
+        _id,
+        "type": _type,
+        "title": coalesce(title_${language}, title_en, title),
+        "body": coalesce(body_${language}, body_en, body),
+        "imageUrl": mainImage.asset->url,
+        publishedAt,
+        // _type එක සලකන්නේ නැතුව, දාපු වෙලාව අනුව පෙර/ඊළඟ ලිපි හොයනවා
+        "previousPost": *[_type in ["decodedPost", "archiveEpisode"] && publishedAt < ^.publishedAt] | order(publishedAt desc)[0]{ "slug": slug.current, "type": _type },
+        "nextPost": *[_type in ["decodedPost", "archiveEpisode"] && publishedAt > ^.publishedAt] | order(publishedAt asc)[0]{ "slug": slug.current, "type": _type }
         }`;
         
         const commentsQuery = `*[_type == "comment" && post._ref == $postId && approved == true] | order(_createdAt desc)`;

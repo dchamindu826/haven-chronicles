@@ -1,0 +1,35 @@
+.site-header-main {
+  background-color: #111827; /* Dark background */
+  padding: 1rem 2rem;
+  border-bottom: 1px solid #374151;
+  width: 100%;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.site-header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center; /* Center the title */
+  align-items: center;
+}
+
+.site-title-link {
+  text-decoration: none;
+}
+
+.site-title-main {
+  color: #d1d5db; /* Light gray color */
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin: 0;
+  transition: color 0.3s ease;
+}
+
+.site-title-link:hover .site-title-main {
+  color: #ffffff;
+}
