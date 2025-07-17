@@ -1,5 +1,6 @@
 import React from 'react';
-import { FaFacebook, FaTwitter, FaYoutube } from 'react-icons/fa';
+// නිවැරදි ක්‍රමය (The fix)
+import { FaFacebook, FaTwitter, FaInstagram } from "react-icons/fa6";
 import './Footer.css';
 
 function Footer() {
